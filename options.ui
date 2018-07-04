@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>optionsDialog</class>
+ <widget class="QDialog" name="optionsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>140</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Options</string>
+  </property>
+  <widget class="QLabel" name="locationCountLabel">
+   <property name="geometry">
+    <rect>
+     <x>116</x>
+     <y>92</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>0 Locations loaded</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="reloadButton">
+   <property name="geometry">
+    <rect>
+     <x>243</x>
+     <y>86</y>
+     <width>30</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="sartopo_address.qrc">
+     <normaloff>:/sartopo_address/reload-icon.png</normaloff>:/sartopo_address/reload-icon.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="locationFileField">
+   <property name="geometry">
+    <rect>
+     <x>15</x>
+     <y>32</y>
+     <width>367</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>14</x>
+     <y>16</y>
+     <width>156</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Location Lookup File (.csv)</string>
+   </property>
+  </widget>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>283</x>
+     <y>87</y>
+     <width>97</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Close</set>
+   </property>
+   <property name="centerButtons">
+    <bool>true</bool>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="sartopo_address.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>reloadButton</sender>
+   <signal>clicked()</signal>
+   <receiver>optionsDialog</receiver>
+   <slot>reload()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>263</x>
+     <y>114</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>320</x>
+     <y>159</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>reload()</slot>
+ </slots>
+</ui>

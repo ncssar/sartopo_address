@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>optionsDialog</class>
+ <widget class="QDialog" name="optionsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>140</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Options</string>
+  </property>
+  <widget class="QLabel" name="locationCountLabel">
+   <property name="geometry">
+    <rect>
+     <x>46</x>
+     <y>92</y>
+     <width>181</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>0 Locations loaded</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="reloadButton">
+   <property name="geometry">
+    <rect>
+     <x>243</x>
+     <y>86</y>
+     <width>30</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="sartopo_address.qrc">
+     <normaloff>:/sartopo_address/reload-icon.png</normaloff>:/sartopo_address/reload-icon.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="locationFileField">
+   <property name="geometry">
+    <rect>
+     <x>15</x>
+     <y>32</y>
+     <width>297</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>14</x>
+     <y>16</y>
+     <width>156</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Location Lookup File (.csv)</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="browseButton">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>29</y>
+     <width>75</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Browse</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="closeButton">
+   <property name="geometry">
+    <rect>
+     <x>296</x>
+     <y>87</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Close</string>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="sartopo_address.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>reloadButton</sender>
+   <signal>clicked()</signal>
+   <receiver>optionsDialog</receiver>
+   <slot>reload()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>263</x>
+     <y>114</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>320</x>
+     <y>139</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>browseButton</sender>
+   <signal>clicked()</signal>
+   <receiver>optionsDialog</receiver>
+   <slot>browseForFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>341</x>
+     <y>53</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>360</x>
+     <y>69</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>closeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>optionsDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>304</x>
+     <y>99</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>287</x>
+     <y>71</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>reload()</slot>
+  <slot>browseForFile()</slot>
+ </slots>
+</ui>

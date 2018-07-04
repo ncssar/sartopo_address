@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>551</width>
+    <height>401</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>104</x>
-     <y>15</y>
+     <y>46</y>
      <width>267</width>
      <height>22</height>
     </rect>
@@ -53,7 +53,7 @@
    <property name="geometry">
     <rect>
      <x>36</x>
-     <y>18</y>
+     <y>49</y>
      <width>53</width>
      <height>16</height>
     </rect>
@@ -124,8 +124,49 @@
     <string>URL</string>
    </property>
   </widget>
+  <widget class="QLabel" name="locationCountLabel">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>16</y>
+     <width>196</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>0 Locations loaded</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="optionsButton">
+   <property name="geometry">
+    <rect>
+     <x>356</x>
+     <y>10</y>
+     <width>30</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="sartopo_address.qrc">
+     <normaloff>:/sartopo_address/options_icon.png</normaloff>:/sartopo_address/options_icon.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+  </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="sartopo_address.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>addrField</sender>
@@ -135,7 +176,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>133</x>
-     <y>31</y>
+     <y>62</y>
     </hint>
     <hint type="destinationlabel">
      <x>183</x>
@@ -150,12 +191,12 @@
    <slot>go()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>149</x>
-     <y>248</y>
+     <x>181</x>
+     <y>247</y>
     </hint>
     <hint type="destinationlabel">
-     <x>217</x>
-     <y>271</y>
+     <x>251</x>
+     <y>285</y>
     </hint>
    </hints>
   </connection>

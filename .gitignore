@@ -3,3 +3,6 @@ __pycache__/sartopo_address_ui.cpython-36.pyc
 .settings/org.eclipse.core.resources.prefs
 .pydevproject
 .project
+__pycache__/sartopo_address_rc.cpython-36.pyc
+__pycache__/options_dialog_ui.cpython-36.pyc
+sartopo_address.rc

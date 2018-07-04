@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="sartopo_address">
+    <file>reload-icon.png</file>
+    <file>options_icon.png</file>
+  </qresource>
+</RCC>

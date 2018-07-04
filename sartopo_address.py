@@ -17,6 +17,7 @@
 #   DATE   |  AUTHOR  |  NOTES
 #-----------------------------------------------------------------------------
 #  7-4-18    TMG        First version
+#  7-4-18    TMG        fix #11 (resource file to remember location file name)
 
 # #############################################################################
 #
@@ -45,6 +46,7 @@ import requests
 import json
 
 from sartopo_address_ui import Ui_Dialog
+from options_dialog_ui import Ui_optionsDialog
 
 class MyWindow(QDialog,Ui_Dialog):
     def __init__(self,parent):
@@ -53,20 +55,27 @@ class MyWindow(QDialog,Ui_Dialog):
         self.rcFileName="sartopo_address.rc"
         self.ui=Ui_Dialog()
         self.ui.setupUi(self)
+        self.locationFile="sartopo_address.csv"
+        self.optionsDialog=optionsDialog(self)
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.firstMarker=True
         self.folderId=None
         
-        self.addrTable=[[]]
-        self.addrTable=[["301 Redbud Way",39,-120],
-                        ["322 Sacramento Street",38,-121],
-                        ["123 Joe Place",32,-122],
-                        ["1262 Redbud Lane",37,-123]]
+        self.addrTable=[["","",""]]
+#         self.addrTable=[["301 Redbud Way",39,-120],
+#                         ["322 Sacramento Street",38,-121],
+#                         ["123 Joe Place",32,-122],
+#                         ["1262 Redbud Lane",37,-123]]
         
-        self.buildTableFromCsv("C:\\Users\\caver\\Downloads\\nevadacountyaddresses.csv")
+
+        self.loadRcFile()
+        self.setGeometry(int(self.x),int(self.y),int(self.w),int(self.h))
+        self.buildTableFromCsv(self.locationFile)
+#         self.ui.locationCountLabel.setText(str(len(self.addrTable))+" locations loaded")
         
         self.addrTableModel=MyTableModel(self.addrTable,self)
         
+        # using a simple string list is easier than an AbstractTableModel subclass
         self.completer=QCompleter([x[0] for x in self.addrTable])
 #         self.completer=QCompleter()
 #         self.completer.setModel(self.addrTableModel)
@@ -79,16 +88,30 @@ class MyWindow(QDialog,Ui_Dialog):
         
         self.ui.addrField.setCompleter(self.completer)
         self.ui.addrField.textChanged.connect(self.lookupFromAddrField)
+        self.ui.optionsButton.clicked.connect(self.optionsDialog.show)
     
     def buildTableFromCsv(self,fileName):
+        self.addrTable=[["","",""]]
         with open(fileName,'r') as csvFile:
             csvReader=csv.reader(csvFile)
             n=0
             for row in csvReader:
                 n=n+1
                 self.addrTable.append(row)
+            # performance speedup: sort alphabetically on the column that 
+            #  will be used for lookup; see setModelSorting docs
             self.addrTable.sort(key=lambda x: x[0])
+            self.completer=QCompleter([x[0] for x in self.addrTable])
+            # performance speedups: see https://stackoverflow.com/questions/33447843
+            self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+            self.completer.setModelSorting(QCompleter.CaseSensitivelySortedModel)
+            self.completer.popup().setUniformItemSizes(True)
+            self.completer.popup().setLayoutMode(QListView.Batched)
+            
+            self.ui.addrField.setCompleter(self.completer)
             print("Finished reading "+str(n)+" addresses.")
+            self.ui.locationCountLabel.setText(str(n)+" locations loaded")
+            self.optionsDialog.ui.locationCountLabel.setText(str(n)+" locations loaded")
             
     def lookupFromAddrField(self):
         addr=self.ui.addrField.text().lower()
@@ -101,17 +124,66 @@ class MyWindow(QDialog,Ui_Dialog):
                 self.ui.latField.setText(str(row[1]))
                 self.ui.lonField.setText(str(row[2]))
                 return
-        self.ui.latField.setText("---")
-        self.ui.lonField.setText("---")  
-                
-#         i=self.addrTableModel.match(self.addrTableModel.createIndex(0,0),Qt.EditRole,addr)[0]
-#         r=self.addrTableModel.data(i,Qt.EditRole)
-#         print("data="+str(r)+"  type="+str(r.type()))
-#         lat=r[1]
-#         lon=r[2]
-#         self.ui.latField.setText(str(lat))
-#         self.ui.lonField.setText(str(lon))
+        self.ui.latField.setText("")
+        self.ui.lonField.setText("")  
 
+    def saveRcFile(self):
+        print("saving...")
+        (x,y,w,h)=self.geometry().getRect()
+        rcFile=QFile(self.rcFileName)
+        if not rcFile.open(QFile.WriteOnly|QFile.Text):
+            warn=QMessageBox(QMessageBox.Warning,"Error","Cannot write resource file " + self.rcFileName + "; proceeding, but, current settings will be lost. "+rcFile.errorString(),
+                            QMessageBox.Ok,self,Qt.WindowTitleHint|Qt.WindowCloseButtonHint|Qt.Dialog|Qt.MSWindowsFixedSizeDialogHint|Qt.WindowStaysOnTopHint)
+            warn.show()
+            warn.raise_()
+            warn.exec_()
+            return
+        out=QTextStream(rcFile)
+        out << "[sartopo_address]\n"
+        out << "locationFile=" << self.locationFile << "\n"
+        out << "x=" << x << "\n"
+        out << "y=" << y << "\n"
+        out << "w=" << w << "\n"
+        out << "h=" << h << "\n"
+        rcFile.close()
+        
+    def loadRcFile(self):
+        print("loading...")
+        rcFile=QFile(self.rcFileName)
+        if not rcFile.open(QFile.ReadOnly|QFile.Text):
+            warn=QMessageBox(QMessageBox.Warning,"Error","Cannot read resource file " + self.rcFileName + "; using default settings. "+rcFile.errorString(),
+                            QMessageBox.Ok,self,Qt.WindowTitleHint|Qt.WindowCloseButtonHint|Qt.Dialog|Qt.MSWindowsFixedSizeDialogHint|Qt.WindowStaysOnTopHint)
+            warn.show()
+            warn.raise_()
+            warn.exec_()
+            return
+        inStr=QTextStream(rcFile)
+        line=inStr.readLine()
+        if line!="[sartopo_address]":
+            warn=QMessageBox(QMessageBox.Warning,"Error","Specified resource file " + self.rcFileName + " is not a valid resource file; using default settings.",
+                            QMessageBox.Ok,self,Qt.WindowTitleHint|Qt.WindowCloseButtonHint|Qt.Dialog|Qt.MSWindowsFixedSizeDialogHint|Qt.WindowStaysOnTopHint)
+            warn.show()
+            warn.raise_()
+            warn.exec_()
+            rcFile.close()
+            return
+        while not inStr.atEnd():
+            line=inStr.readLine()
+            tokens=line.split("=")
+            if tokens[0]=="x":
+                self.x=int(tokens[1])
+            elif tokens[0]=="y":
+                self.y=int(tokens[1])
+            elif tokens[0]=="w":
+                self.w=int(tokens[1])
+            elif tokens[0]=="h":
+                self.h=int(tokens[1])
+            elif tokens[0]=="locationFile":
+                self.locationFile=tokens[1]
+            elif tokens[0]=="font-size":
+                self.fontSize=int(tokens[1].replace('pt',''))
+        rcFile.close()
+        
     def createFolder(self,folderName):
         infoStr=""
         if self.ui.urlField.text():
@@ -214,6 +286,52 @@ class MyWindow(QDialog,Ui_Dialog):
     def go(self):
         self.createMarker([" ".join(self.ui.addrField.text().split()[0:2]),self.ui.latField.text(),self.ui.lonField.text()],self.folderId)
 
+    def closeEvent(self,event):
+        self.saveRcFile()
+        event.accept()
+        self.parent.quit()
+
+class optionsDialog(QDialog,Ui_optionsDialog):
+    def __init__(self,parent):
+        QDialog.__init__(self)
+        self.parent=parent
+        self.ui=Ui_optionsDialog()
+        self.ui.setupUi(self)
+        self.ui.locationFileField.setText(self.parent.locationFile)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+        self.setWindowFlags((self.windowFlags() | Qt.WindowStaysOnTopHint) & ~Qt.WindowMinMaxButtonsHint & ~Qt.WindowContextHelpButtonHint)
+        self.setFixedSize(self.size())
+
+    def showEvent(self,event):
+        # clear focus from all fields, otherwise previously edited field gets focus on next show,
+        # which could lead to accidental editing
+        self.ui.locationFileField.clearFocus()
+        self.ui.locationFileField.setText(self.parent.locationFile)
+        
+    def displayLocationCount(self):
+        self.ui.locationCountLabel.setText(str(len(self.parent.addrTable))+" locations loaded")
+        self.parent.ui.locationCountLabel.setText(str(len(self.parent.addrTable))+" locations loaded")
+    
+    def browseForFile(self):
+        fileDialog=QFileDialog()
+        fileDialog.setOption(QFileDialog.DontUseNativeDialog)
+        fileDialog.setWindowFlags(Qt.WindowStaysOnTopHint)
+#         fileDialog.setProxyModel(CSVFileSortFilterProxyModel(self))
+        fileDialog.setNameFilter("CSV Location Lookup Files (*.csv)")
+#         fileDialog.setDirectory(self.firstWorkingDir)
+        if fileDialog.exec_():
+            fileName=fileDialog.selectedFiles()[0]
+            self.ui.locationFileField.setText(fileName)
+            self.parent.locationFile=fileName
+        else: # user pressed cancel on the file browser dialog
+            return
+        
+    def reload(self):
+#         self.parent.addrTable=[[]]
+        self.parent.buildTableFromCsv(self.ui.locationFileField.text())
+        self.displayLocationCount()
+        
+        
 class MyTableModel(QAbstractTableModel):
     def __init__(self, datain, parent=None, *args):
         QAbstractTableModel.__init__(self, parent, *args)
