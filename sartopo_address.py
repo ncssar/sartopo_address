@@ -18,6 +18,7 @@
 #-----------------------------------------------------------------------------
 #  7-4-18    TMG        First version
 #  7-4-18    TMG        fix #11 (resource file to remember location file name)
+#  7-4-18    TMG        fix #12 (handle missing .rc file)
 
 # #############################################################################
 #
@@ -52,7 +53,7 @@ class MyWindow(QDialog,Ui_Dialog):
     def __init__(self,parent):
         QDialog.__init__(self)
         self.parent=parent
-        self.rcFileName="sartopo_address.rc"
+        self.rcFileName="sdartopo_address.rc"
         self.ui=Ui_Dialog()
         self.ui.setupUi(self)
         self.locationFile="sartopo_address.csv"
@@ -60,7 +61,10 @@ class MyWindow(QDialog,Ui_Dialog):
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.firstMarker=True
         self.folderId=None
-        
+        self.x=100
+        self.y=11
+        self.w=300
+        self.h=250
         self.addrTable=[["","",""]]
 #         self.addrTable=[["301 Redbud Way",39,-120],
 #                         ["322 Sacramento Street",38,-121],
