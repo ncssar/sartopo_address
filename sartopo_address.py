@@ -19,6 +19,7 @@
 #  7-4-18    TMG        First version
 #  7-4-18    TMG        fix #11 (resource file to remember location file name)
 #  7-4-18    TMG        fix #12 (handle missing .rc file)
+#  7-8-18    TMG        first pass at adding street names (all with 39 -120)
 
 # #############################################################################
 #
@@ -45,6 +46,7 @@ import sys
 import csv
 import requests
 import json
+import re
 
 from sartopo_address_ui import Ui_Dialog
 from options_dialog_ui import Ui_optionsDialog
@@ -66,6 +68,7 @@ class MyWindow(QDialog,Ui_Dialog):
         self.w=300
         self.h=250
         self.addrTable=[["","",""]]
+        self.streetAndCityTable=[["","",""]]
 #         self.addrTable=[["301 Redbud Way",39,-120],
 #                         ["322 Sacramento Street",38,-121],
 #                         ["123 Joe Place",32,-122],
@@ -102,6 +105,14 @@ class MyWindow(QDialog,Ui_Dialog):
             for row in csvReader:
                 n=n+1
                 self.addrTable.append(row)
+            # also add each street-and-city (just once) as its own entry 
+            for row in self.addrTable:
+                streetAndCity=re.sub(r'^[0-9]+ ','',row[0])
+                streetAndCityRow=[streetAndCity,39,-120]
+                if not streetAndCityRow in self.streetAndCityTable:
+                    self.streetAndCityTable.append(streetAndCityRow)
+#                     print("adding street: "+streetAndCity)
+            self.addrTable=self.addrTable+self.streetAndCityTable
             # performance speedup: sort alphabetically on the column that 
             #  will be used for lookup; see setModelSorting docs
             self.addrTable.sort(key=lambda x: x[0])
@@ -114,6 +125,7 @@ class MyWindow(QDialog,Ui_Dialog):
             
             self.ui.addrField.setCompleter(self.completer)
             print("Finished reading "+str(n)+" addresses.")
+            print("Added "+str(len(self.streetAndCityTable))+" street names.")
             self.ui.locationCountLabel.setText(str(n)+" locations loaded")
             self.optionsDialog.ui.locationCountLabel.setText(str(n)+" locations loaded")
             
