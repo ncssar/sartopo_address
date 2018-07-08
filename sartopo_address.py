@@ -53,7 +53,7 @@ class MyWindow(QDialog,Ui_Dialog):
     def __init__(self,parent):
         QDialog.__init__(self)
         self.parent=parent
-        self.rcFileName="sdartopo_address.rc"
+        self.rcFileName="sartopo_address.rc"
         self.ui=Ui_Dialog()
         self.ui.setupUi(self)
         self.locationFile="sartopo_address.csv"
@@ -194,7 +194,7 @@ class MyWindow(QDialog,Ui_Dialog):
             url=self.ui.urlField.text()
             parse=url.lower().replace("http://","").split("/")
             domainAndPort=parse[0]
-            mapCode=parse[-1]
+            mapID=parse[-1]
             print("domainAndPort: "+domainAndPort)
             s=requests.session()
             try:
@@ -210,7 +210,7 @@ class MyWindow(QDialog,Ui_Dialog):
                 f['label']="Addresses"
                 try:
 #                     r=s.post("http://"+domainAndPort+"/rest/folder/",data={'json':json.dumps(f)})
-                    r=s.post("http://"+domainAndPort+"/api/v1/map/"+mapCode+"/Folder/",data={'json':json.dumps(f)})
+                    r=s.post("http://"+domainAndPort+"/api/v1/map/"+mapID+"/Folder/",data={'json':json.dumps(f)})
                 except requests.exceptions.RequestException as err:
                     postErr=err
                 else:
@@ -231,8 +231,6 @@ class MyWindow(QDialog,Ui_Dialog):
                             print("  response content:"+r.content)
         return folderId
  
-
-           
     def createMarker(self,marker,folderId=None):
         print("createMarker called with folderId="+str(folderId))
         infoStr=""
@@ -252,11 +250,17 @@ class MyWindow(QDialog,Ui_Dialog):
             #   - post to domainAndPort/api/v1/map/<map_id>/Folder/
             
             # in both cases, the folder request json should be "label":"<label>","id":null
+        
+            # to make sure the map is valid: send a get to domainAndPort/m/<map_id>
+            #  it should return 200
             
+            # to determine API: try loading domainAndPort/api/v1/map/<map_id>
+            #  new API will return 200; old API will return 404
+             
             url=self.ui.urlField.text()
             parse=url.lower().replace("http://","").split("/")
             domainAndPort=parse[0]
-            mapCode=parse[-1]
+            mapID=parse[-1]
             print("domainAndPort: "+domainAndPort)
             s=requests.session()
             try:
@@ -274,7 +278,7 @@ class MyWindow(QDialog,Ui_Dialog):
                 j['position']={"lat":marker[1],"lng":marker[2]}
                 try:
 #                             r=s.post("http://"+domainAndPort+"/rest/marker/",data={'json':json.dumps(j)})
-                     r=s.post("http://"+domainAndPort+"/api/v1/map/"+mapCode+"/Marker/",data={'json':json.dumps(j)})
+                     r=s.post("http://"+domainAndPort+"/api/v1/map/"+mapID+"/Marker/",data={'json':json.dumps(j)})
                 except requests.exceptions.RequestException as err:
                     postErr=err
                 else:
