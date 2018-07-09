@@ -20,6 +20,14 @@
 #  7-4-18    TMG        fix #11 (resource file to remember location file name)
 #  7-4-18    TMG        fix #12 (handle missing .rc file)
 #  7-8-18    TMG        first pass at adding street names (all with 39 -120)
+#  7-8-18    TMG        interim solution for street name coordinates: use
+#                        the coordinates of the first address encountered
+#                        on that street; hopefully soon to be replaced by
+#                        a method that draws the entire line for that street;
+#                        set the street marker label to use all words of the
+#                        street name up to but excluding the street suffix
+#                        (this rule works for exact addresses and for streets);
+#                        hardcode to always stay on top
 
 # #############################################################################
 #
@@ -60,6 +68,7 @@ class MyWindow(QDialog,Ui_Dialog):
         self.ui.setupUi(self)
         self.locationFile="sartopo_address.csv"
         self.optionsDialog=optionsDialog(self)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.firstMarker=True
         self.folderId=None
@@ -99,20 +108,45 @@ class MyWindow(QDialog,Ui_Dialog):
     
     def buildTableFromCsv(self,fileName):
         self.addrTable=[["","",""]]
+        self.scLowestDict={}
         with open(fileName,'r') as csvFile:
             csvReader=csv.reader(csvFile)
             n=0
             for row in csvReader:
                 n=n+1
                 self.addrTable.append(row)
-            # also add each street-and-city (just once) as its own entry 
+            # also add each street-and-city (just once) as its own entry;
+            #  for coordinates (for now), use a fixed offset from the
+            #  coordinates of the lowest number on that street
             for row in self.addrTable:
-                streetAndCity=re.sub(r'^[0-9]+ ','',row[0])
-                streetAndCityRow=[streetAndCity,39,-120]
-                if not streetAndCityRow in self.streetAndCityTable:
-                    self.streetAndCityTable.append(streetAndCityRow)
+#                 print("row:"+str(row))
+                addrParse=row[0].split()
+#                 print("parse:"+str(addrParse))
+                if len(addrParse)>0:
+                    number=addrParse[0]
+                    streetAndCity=' '.join(addrParse[1:])
+    #                 streetAndCity=re.sub(r'^[0-9]+ ','',row[0])
+    #                 scRow=[streetAndCity,row[1],row[2]]
+    #                 scnRow=[streetAndCity,number,row[1],row[2]]
+#                     if streetAndCity=="Whispering Pines Lane, Grass Valley":
+#                         print("street found: number="+str(number)+"  "+str(row))
+#                         print("   existing dict entry="+str(self.scLowestDict.get(streetAndCity,'none')))
+#                     if (not streetAndCity in self.scLowestDict) or (number<self.scLowestDict[streetAndCity][0]):
+                    if not streetAndCity in self.scLowestDict:
+                        self.scLowestDict[streetAndCity]=[number,row[1],row[2]]
+#                         if streetAndCity=="Whispering Pines Lane, Grass Valley":
+#                             print("lowest number so far for street: "+str(number)+" "+streetAndCity)
+    #                     self.scnTable.append(scnRow)
+#                 else: # it does exist; but if the current number is lower,
+                    # replace the existing entry with the current entry
 #                     print("adding street: "+streetAndCity)
-            self.addrTable=self.addrTable+self.streetAndCityTable
+#                     if number<self.scLowestDict[streetAndCity]:
+#                         self.scnTable
+#             self.addrTable=self.addrTable+self.streetAndCityTable
+            for key,value in self.scLowestDict.items():
+                row=[key,value[1],value[2]]
+                self.addrTable.append(row)
+#                 print("adding "+str(row))
             # performance speedup: sort alphabetically on the column that 
             #  will be used for lookup; see setModelSorting docs
             self.addrTable.sort(key=lambda x: x[0])
@@ -125,7 +159,7 @@ class MyWindow(QDialog,Ui_Dialog):
             
             self.ui.addrField.setCompleter(self.completer)
             print("Finished reading "+str(n)+" addresses.")
-            print("Added "+str(len(self.streetAndCityTable))+" street names.")
+            print("Added "+str(len(self.scLowestDict))+" street names.")
             self.ui.locationCountLabel.setText(str(n)+" locations loaded")
             self.optionsDialog.ui.locationCountLabel.setText(str(n)+" locations loaded")
             
@@ -221,8 +255,8 @@ class MyWindow(QDialog,Ui_Dialog):
                 f={}
                 f['label']="Addresses"
                 try:
-#                     r=s.post("http://"+domainAndPort+"/rest/folder/",data={'json':json.dumps(f)})
-                    r=s.post("http://"+domainAndPort+"/api/v1/map/"+mapID+"/Folder/",data={'json':json.dumps(f)})
+                    r=s.post("http://"+domainAndPort+"/rest/folder/",data={'json':json.dumps(f)})
+#                     r=s.post("http://"+domainAndPort+"/api/v1/map/"+mapID+"/Folder/",data={'json':json.dumps(f)})
                 except requests.exceptions.RequestException as err:
                     postErr=err
                 else:
@@ -232,7 +266,7 @@ class MyWindow(QDialog,Ui_Dialog):
                         rj=r.json()
                     except:
                         print("ERROR: could not parse json in folder request response.")
-                        print("  response text:"+r.content)
+                        print("  response text:"+str(r.content))
                     else:
                         print("RESPONSE:")
                         print(rj)
@@ -240,7 +274,7 @@ class MyWindow(QDialog,Ui_Dialog):
                             folderId=rj['id']
                         else:
                             print("No folder ID was returned from the folder request;")
-                            print("  response content:"+r.content)
+                            print("  response content:"+str(r.content))
         return folderId
  
     def createMarker(self,marker,folderId=None):
@@ -289,8 +323,8 @@ class MyWindow(QDialog,Ui_Dialog):
                 j['comments']=""
                 j['position']={"lat":marker[1],"lng":marker[2]}
                 try:
-#                             r=s.post("http://"+domainAndPort+"/rest/marker/",data={'json':json.dumps(j)})
-                     r=s.post("http://"+domainAndPort+"/api/v1/map/"+mapID+"/Marker/",data={'json':json.dumps(j)})
+                    r=s.post("http://"+domainAndPort+"/rest/marker/",data={'json':json.dumps(j)})
+#                      r=s.post("http://"+domainAndPort+"/api/v1/map/"+mapID+"/Marker/",data={'json':json.dumps(j)})
                 except requests.exceptions.RequestException as err:
                     postErr=err
                 else:
@@ -303,8 +337,21 @@ class MyWindow(QDialog,Ui_Dialog):
                     infoStr+="\nWrote URL?   NO"
                     QMessageBox.warning(self,"URL Post Request Failed","URL POST request failed:\n\n"+str(postErr)+"\n\nNo markers written to URL.  Fix or blank out the URL field, and try again.")
     
+    def getStreetLabel(self):
+        addr=self.ui.addrField.text()
+        parse=addr.split()
+        # assume that the street suffix token ends with a comma
+        n=0
+        for n in range(len(parse)):
+            print("testing "+parse[n])
+            if parse[n][len(parse[n])-1]==",":
+                break
+        if n==0:
+            n=2
+        return ' '.join(parse[0:n])
+    
     def go(self):
-        self.createMarker([" ".join(self.ui.addrField.text().split()[0:2]),self.ui.latField.text(),self.ui.lonField.text()],self.folderId)
+        self.createMarker([self.getStreetLabel(),self.ui.latField.text(),self.ui.lonField.text()],self.folderId)
 
     def closeEvent(self,event):
         self.saveRcFile()
