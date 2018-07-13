@@ -28,6 +28,7 @@
 #                        street name up to but excluding the street suffix
 #                        (this rule works for exact addresses and for streets);
 #                        hardcode to always stay on top
+# 7-13-18     TMG       fix #13 (marker labels cannot be changed later)
 
 # #############################################################################
 #
@@ -319,7 +320,7 @@ class MyWindow(QDialog,Ui_Dialog):
                 j={}
                 j['label']=marker[0]
                 j['folderId']=folderId
-                j['url']=""
+                j['url']="#000000" # leaving the URL(color) field blank results in a marker whose label cannot be changed
                 j['comments']=""
                 j['position']={"lat":marker[1],"lng":marker[2]}
                 try:
