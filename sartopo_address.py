@@ -29,7 +29,8 @@
 #                        (this rule works for exact addresses and for streets);
 #                        hardcode to always stay on top
 # 7-13-18     TMG       fix #13 (marker labels cannot be changed later)
-
+# 8-29-18     TMG       fix #1 (autodetect sartopo API version / use a module)
+#
 # #############################################################################
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -57,6 +58,8 @@ import requests
 import json
 import re
 
+from sartopo_python import SartopoSession
+
 from sartopo_address_ui import Ui_Dialog
 from options_dialog_ui import Ui_optionsDialog
 
@@ -73,6 +76,7 @@ class MyWindow(QDialog,Ui_Dialog):
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.firstMarker=True
         self.folderId=None
+        self.sts=None
         self.x=100
         self.y=11
         self.w=300
@@ -106,6 +110,16 @@ class MyWindow(QDialog,Ui_Dialog):
         self.ui.addrField.setCompleter(self.completer)
         self.ui.addrField.textChanged.connect(self.lookupFromAddrField)
         self.ui.optionsButton.clicked.connect(self.optionsDialog.show)
+        
+#         box=QLabel("BOX",self.ui.optionsButton)
+#         box.setStyleSheet("background:blue;border:2px outset green")
+#         box.setGeometry(-10,-10,25,25)
+        self.ui.optionsButton.setToolTip("stuff")
+#         self.ui.optionsButton.showText([100,100],"stuff1")
+#         tt1=QToolTip(self.ui)
+#         tt2=QToolTip(self.ui)
+
+#         self.getUrl()
     
     def buildTableFromCsv(self,fileName):
         self.addrTable=[["","",""]]
@@ -163,7 +177,28 @@ class MyWindow(QDialog,Ui_Dialog):
             print("Added "+str(len(self.scLowestDict))+" street names.")
             self.ui.locationCountLabel.setText(str(n)+" locations loaded")
             self.optionsDialog.ui.locationCountLabel.setText(str(n)+" locations loaded")
+
+    def createSTS(self):
+        if self.ui.urlField.text():
+            url=self.ui.urlField.text()
+            parse=url.lower().replace("http://","").split("/")
+            domainAndPort=parse[0]
+            mapID=parse[-1]
+            self.sts=SartopoSession(mapID)
             
+#     def getUrl(self):
+#         stateFile="C:\Users\caver\AppData\Local\Google\Chrome\User Data\Local State"
+#         with open(stateFile,'r') as s:
+#             j=json.loads(s.read())
+#             s.close()     
+#         
+#         chrome_window=Desktop(backend="uia").window(class_name_re='Chrome')
+#         address_bar_wrapper=chrome_window['Google Chrome'].main.Edit.wrapper_object()
+#         url_1=address_bar_wrapper.legacy_properties()['Value']
+#         url_2=address_bar_wrapper.iface_value.CurrentValue
+#         print("url 1:'"+url_1+"'")
+#         print("url 2:'"+url_2+"'")
+    
     def lookupFromAddrField(self):
         addr=self.ui.addrField.text().lower()
 #         # reduce lag by skipping lookup until more than 3 characters
@@ -234,109 +269,6 @@ class MyWindow(QDialog,Ui_Dialog):
             elif tokens[0]=="font-size":
                 self.fontSize=int(tokens[1].replace('pt',''))
         rcFile.close()
-        
-    def createFolder(self,folderName):
-        infoStr=""
-        if self.ui.urlField.text():
-            url=self.ui.urlField.text()
-            parse=url.lower().replace("http://","").split("/")
-            domainAndPort=parse[0]
-            mapID=parse[-1]
-            print("domainAndPort: "+domainAndPort)
-            s=requests.session()
-            try:
-                s.get(url)
-            except:
-                QMessageBox.warning(self,"URL Failed","Could not communicate with the specfied URL.  Fix it or blank it out, and try again.")
-                infoStr+="\nWrote URL?   NO"
-            else:
-                folderId=None
-                postErr=""
-                # first, make a folder to put all the markers in
-                f={}
-                f['label']="Addresses"
-                try:
-                    r=s.post("http://"+domainAndPort+"/rest/folder/",data={'json':json.dumps(f)})
-#                     r=s.post("http://"+domainAndPort+"/api/v1/map/"+mapID+"/Folder/",data={'json':json.dumps(f)})
-                except requests.exceptions.RequestException as err:
-                    postErr=err
-                else:
-                    print("DUMP:")
-                    print(json.dumps(f))
-                    try:
-                        rj=r.json()
-                    except:
-                        print("ERROR: could not parse json in folder request response.")
-                        print("  response text:"+str(r.content))
-                    else:
-                        print("RESPONSE:")
-                        print(rj)
-                        if 'id' in rj:
-                            folderId=rj['id']
-                        else:
-                            print("No folder ID was returned from the folder request;")
-                            print("  response content:"+str(r.content))
-        return folderId
- 
-    def createMarker(self,marker,folderId=None):
-        print("createMarker called with folderId="+str(folderId))
-        infoStr=""
-        if self.firstMarker:
-            self.folderId=self.createFolder("Addresses")
-            folderId=self.folderId
-        if self.ui.urlField.text():
-            # the domain and port is defined as the URL up to and including the first slash
-            #  after the http:// if it exists, or just the first slash otherwise
-            
-            # old method (2017, per email 9-29-15):
-            #   - first, send a get request to the map URL - this authenticates the session
-            #   - next, send a post to domainAndPort/rest/folder/
-            
-            # new method (May 2018, per email 5-13-18):
-            #   - no get request needed
-            #   - post to domainAndPort/api/v1/map/<map_id>/Folder/
-            
-            # in both cases, the folder request json should be "label":"<label>","id":null
-        
-            # to make sure the map is valid: send a get to domainAndPort/m/<map_id>
-            #  it should return 200
-            
-            # to determine API: try loading domainAndPort/api/v1/map/<map_id>
-            #  new API will return 200; old API will return 404
-             
-            url=self.ui.urlField.text()
-            parse=url.lower().replace("http://","").split("/")
-            domainAndPort=parse[0]
-            mapID=parse[-1]
-            print("domainAndPort: "+domainAndPort)
-            s=requests.session()
-            try:
-                s.get(url)
-            except:
-                QMessageBox.warning(self,"URL Failed","Could not communicate with the specfied URL.  Fix it or blank it out, and try again.")
-                infoStr+="\nWrote URL?   NO"
-            else:
-                postErr=""
-                j={}
-                j['label']=marker[0]
-                j['folderId']=folderId
-                j['url']="#000000" # leaving the URL(color) field blank results in a marker whose label cannot be changed
-                j['comments']=""
-                j['position']={"lat":marker[1],"lng":marker[2]}
-                try:
-                    r=s.post("http://"+domainAndPort+"/rest/marker/",data={'json':json.dumps(j)})
-#                      r=s.post("http://"+domainAndPort+"/api/v1/map/"+mapID+"/Marker/",data={'json':json.dumps(j)})
-                except requests.exceptions.RequestException as err:
-                    postErr=err
-                else:
-                    print("DUMP:")
-                    print(json.dumps(j))
-                if postErr=="":
-                    infoStr+="\nWrote URL?   YES"
-                    self.firstMarker=False
-                else:
-                    infoStr+="\nWrote URL?   NO"
-                    QMessageBox.warning(self,"URL Post Request Failed","URL POST request failed:\n\n"+str(postErr)+"\n\nNo markers written to URL.  Fix or blank out the URL field, and try again.")
     
     def getStreetLabel(self):
         addr=self.ui.addrField.text()
@@ -352,7 +284,10 @@ class MyWindow(QDialog,Ui_Dialog):
         return ' '.join(parse[0:n])
     
     def go(self):
-        self.createMarker([self.getStreetLabel(),self.ui.latField.text(),self.ui.lonField.text()],self.folderId)
+        if self.firstMarker:
+            self.folderId=self.sts.addFolder("Addresses")
+            self.firstMarker=False
+        self.sts.addMarker(self.ui.latField.text(),self.ui.lonField.text(),self.getStreetLabel(),self.folderId)
 
     def closeEvent(self,event):
         self.saveRcFile()

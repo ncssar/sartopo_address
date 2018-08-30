@@ -206,9 +206,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>urlField</sender>
+   <signal>editingFinished()</signal>
+   <receiver>Dialog</receiver>
+   <slot>createSTS()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>224</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>248</x>
+     <y>126</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>lookupFromAddrField()</slot>
   <slot>go()</slot>
+  <slot>createSTS()</slot>
  </slots>
 </ui>

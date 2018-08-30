@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'sartopo_address.ui'
 #
-# Created by: PyQt5 UI code generator 5.8.2
+# Created by: PyQt5 UI code generator 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -59,6 +59,7 @@ class Ui_Dialog(object):
         self.retranslateUi(Dialog)
         self.addrField.editingFinished.connect(Dialog.lookupFromAddrField)
         self.goButton.clicked.connect(Dialog.go)
+        self.urlField.editingFinished.connect(Dialog.createSTS)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
