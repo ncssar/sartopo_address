@@ -1,5 +1,19 @@
 <RCC>
   <qresource prefix="sartopo_address">
+    <file>sartopo_markers/animal_issue.png</file>
+    <file>sartopo_markers/assisted.png</file>
+    <file>sartopo_markers/dot.png</file>
+    <file>sartopo_markers/evacuated.png</file>
+    <file>sartopo_markers/follow_up.png</file>
+    <file>sartopo_markers/IC.png</file>
+    <file>sartopo_markers/rescued.png</file>
+    <file>sartopo_markers/route_blocked.png</file>
+    <file>sartopo_markers/shelter_in_place.png</file>
+    <file>sartopo_markers/structure_damaged.png</file>
+    <file>sartopo_markers/structure_destroyed.png</file>
+    <file>sartopo_markers/structure_failed.png</file>
+    <file>sartopo_markers/structure_no_damage.png</file>
+    <file>sartopo_markers/warning.png</file>
     <file>reload-icon.png</file>
     <file>options_icon.png</file>
   </qresource>

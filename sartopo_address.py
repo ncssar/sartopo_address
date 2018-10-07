@@ -30,6 +30,9 @@
 #                        hardcode to always stay on top
 # 7-13-18     TMG       fix #13 (marker labels cannot be changed later)
 # 8-29-18     TMG       fix #1 (autodetect sartopo API version / use a module)
+#  10-7-18    TMG       modify to work with api upgrades in sartopo_python
+#                         (probably not backwards compatible); incorporate USAR
+#                         symbol selection
 #
 # #############################################################################
 #
@@ -54,7 +57,6 @@ from PyQt5.QtWidgets import *
 
 import sys
 import csv
-import requests
 import json
 import re
 
@@ -62,6 +64,28 @@ from sartopo_python import SartopoSession
 
 from sartopo_address_ui import Ui_Dialog
 from options_dialog_ui import Ui_optionsDialog
+
+markerSymbolDict={}
+markerSymbolDict["Animal Issue"]="usar-14"
+markerSymbolDict["IC"]="cp"
+markerSymbolDict["Warning"]="warning"
+markerSymbolDict["Structure No Damage"]="usar-1"
+markerSymbolDict["Structure Damaged"]="usar-2"
+markerSymbolDict["Structure Failed"]="usar-3"
+markerSymbolDict["Structure Destroyed"]="usar-4"
+markerSymbolDict["No Damage"]="usar-1"
+markerSymbolDict["Damaged"]="usar-2"
+markerSymbolDict["Failed"]="usar-3"
+markerSymbolDict["Destroyed"]="usar-4"
+markerSymbolDict["Assisted"]="usar-5"
+markerSymbolDict["Evacuated"]="usar-6"
+markerSymbolDict["Rescued"]="usar-7"
+markerSymbolDict["Follow-Up"]="usar-8"
+markerSymbolDict["Follow-up"]="usar-8"
+markerSymbolDict["Follow Up"]="usar-8"
+markerSymbolDict["Follow up"]="usar-8"
+markerSymbolDict["Shelter In Place"]="usar-13"
+markerSymbolDict["Route Blocked"]="usar-20"
 
 class MyWindow(QDialog,Ui_Dialog):
     def __init__(self,parent):
@@ -83,11 +107,6 @@ class MyWindow(QDialog,Ui_Dialog):
         self.h=250
         self.addrTable=[["","",""]]
         self.streetAndCityTable=[["","",""]]
-#         self.addrTable=[["301 Redbud Way",39,-120],
-#                         ["322 Sacramento Street",38,-121],
-#                         ["123 Joe Place",32,-122],
-#                         ["1262 Redbud Lane",37,-123]]
-        
 
         self.loadRcFile()
         self.setGeometry(int(self.x),int(self.y),int(self.w),int(self.h))
@@ -184,7 +203,7 @@ class MyWindow(QDialog,Ui_Dialog):
             parse=url.lower().replace("http://","").split("/")
             domainAndPort=parse[0]
             mapID=parse[-1]
-            self.sts=SartopoSession(mapID)
+            self.sts=SartopoSession(domainAndPort=domainAndPort,mapID=mapID)
             
 #     def getUrl(self):
 #         stateFile="C:\Users\caver\AppData\Local\Google\Chrome\User Data\Local State"
@@ -283,11 +302,16 @@ class MyWindow(QDialog,Ui_Dialog):
             n=2
         return ' '.join(parse[0:n])
     
+    def getMarkerSymbol(self):
+        t=self.ui.markerComboBox.currentText()
+        symbol=markerSymbolDict.get(t,"point")
+        return symbol
+        
     def go(self):
         if self.firstMarker:
             self.folderId=self.sts.addFolder("Addresses")
             self.firstMarker=False
-        self.sts.addMarker(self.ui.latField.text(),self.ui.lonField.text(),self.getStreetLabel(),self.folderId)
+        self.sts.addMarker(self.ui.latField.text(),self.ui.lonField.text(),self.getStreetLabel(),"","FF0000",self.getMarkerSymbol(),None,self.folderId)
 
     def closeEvent(self,event):
         self.saveRcFile()
