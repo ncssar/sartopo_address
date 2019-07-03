@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>46</x>
-     <y>92</y>
+     <y>110</y>
      <width>181</width>
      <height>20</height>
     </rect>
@@ -33,7 +33,7 @@
    <property name="geometry">
     <rect>
      <x>243</x>
-     <y>86</y>
+     <y>104</y>
      <width>30</width>
      <height>30</height>
     </rect>
@@ -55,31 +55,31 @@
   <widget class="QLineEdit" name="locationFileField">
    <property name="geometry">
     <rect>
-     <x>15</x>
-     <y>32</y>
+     <x>10</x>
+     <y>74</y>
      <width>297</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>14</x>
-     <y>16</y>
-     <width>156</width>
+     <x>9</x>
+     <y>58</y>
+     <width>160</width>
      <height>16</height>
     </rect>
    </property>
    <property name="text">
-    <string>Location Lookup File (.csv)</string>
+    <string>Location Lookup File (.csv):</string>
    </property>
   </widget>
   <widget class="QPushButton" name="browseButton">
    <property name="geometry">
     <rect>
-     <x>320</x>
-     <y>29</y>
+     <x>317</x>
+     <y>73</y>
      <width>75</width>
      <height>28</height>
     </rect>
@@ -91,8 +91,8 @@
   <widget class="QPushButton" name="closeButton">
    <property name="geometry">
     <rect>
-     <x>296</x>
-     <y>87</y>
+     <x>299</x>
+     <y>106</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -101,7 +101,78 @@
     <string>Close</string>
    </property>
   </widget>
+  <widget class="STSFeatureComboBox" name="folderComboBox">
+   <property name="geometry">
+    <rect>
+     <x>243</x>
+     <y>32</y>
+     <width>148</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>9</x>
+     <y>32</y>
+     <width>233</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Only list existing labels from fodler(s):</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>9</x>
+     <y>7</y>
+     <width>95</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Saved map URL:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="urlField">
+   <property name="geometry">
+    <rect>
+     <x>107</x>
+     <y>6</y>
+     <width>261</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="linkIndicator">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>373</x>
+     <y>8</y>
+     <width>20</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+  </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>STSFeatureComboBox</class>
+   <extends>QComboBox</extends>
+   <header location="global"> STSFeatureComboBox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="sartopo_address.qrc"/>
  </resources>
@@ -129,8 +200,8 @@
    <slot>browseForFile()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>341</x>
-     <y>53</y>
+     <x>338</x>
+     <y>97</y>
     </hint>
     <hint type="destinationlabel">
      <x>360</x>
@@ -145,8 +216,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>304</x>
-     <y>99</y>
+     <x>307</x>
+     <y>118</y>
     </hint>
     <hint type="destinationlabel">
      <x>287</x>
