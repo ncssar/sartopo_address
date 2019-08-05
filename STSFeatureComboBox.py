@@ -24,6 +24,10 @@ class STSFeatureComboBox(QComboBox):
         print("Fitlering using folder id "+str(ffid))
         self.parent.updateFeatureList(self.featureClass,ffid)
         QComboBox.showPopup(self)
+        # expand the drop-down list width to fit the longest choice
+        #   from stackoverflow.com/questions/3151798
+        self.view().setMinimumWidth(self.minimumSizeHint().width())
+        
         
     # setItems: rebuild the list of selections; prepend with Edit and a separator;
     #  each item should be a sartopo feature name and its corresponding sartopo id
