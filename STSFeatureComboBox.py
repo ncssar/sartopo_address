@@ -17,11 +17,11 @@ class STSFeatureComboBox(QComboBox):
    
     def showPopup(self):
         ffid=None
-        print("t1")
+#         print("t1")
         if self.filterFolderComboBox:
             if self.filterFolderComboBox.currentText()!=self.filterFolderComboBox.headerText:
                 ffid=self.filterFolderComboBox.currentData()
-        print("Fitlering using folder id "+str(ffid))
+        print("Filtering using folder id "+str(ffid))
         self.parent.updateFeatureList(self.featureClass,ffid)
         QComboBox.showPopup(self)
         # expand the drop-down list width to fit the longest choice

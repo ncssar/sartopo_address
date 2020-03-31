@@ -5,7 +5,7 @@
 #    a database of addresses and their corresponding lat/lon coordinates
 #
 #   developed for Nevada County Sheriff's Search and Rescue
-#    Copyright (c) 2018 Tom Grundy
+#    Copyright (c) 2020 Tom Grundy
 #
 #  http://github.com/ncssar/sartopo_address
 #
@@ -39,6 +39,11 @@
 #                         combo box is selected; add link status indicator lights
 #                         to show if a valid API and mapID has been connected;
 #                         enforce min required version of sartopo_python
+#  3-30-20    TMG       fix #23: preserve folder and symbol when editing an existing marker;
+#                         fix #19: add 'Go' button to reduce chance for accidental marker moves;
+#                         add optional timestamp that populates the 'description' field;
+#                         required sartopo_python_min_version increased to 1.0.6
+#                         because entire property set must be returned with each marker
 #
 # #############################################################################
 #
@@ -66,8 +71,9 @@ import csv
 import json
 import re
 import time
+from datetime import datetime
 
-sartopo_python_min_version="1.0.5"
+sartopo_python_min_version="1.0.6"
 
 import pkg_resources
 sartopo_python_installed_version=pkg_resources.get_distribution("sartopo-python").version
@@ -103,6 +109,9 @@ markerSymbolDict["Follow up"]="usar-8"
 markerSymbolDict["Shelter In Place"]="usar-13"
 markerSymbolDict["Route Blocked"]="usar-20"
 
+def sortByTitle(item):
+    return item["properties"]["title"]
+
 class MyWindow(QDialog,Ui_Dialog):
     def __init__(self,parent):
         QDialog.__init__(self)
@@ -114,7 +123,7 @@ class MyWindow(QDialog,Ui_Dialog):
         self.optionsDialog=optionsDialog(self)
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_DeleteOnClose)
-        self.firstMarker=True
+        self.url=None
         self.folderId=None
         self.sts=None
         self.link=-1
@@ -128,10 +137,10 @@ class MyWindow(QDialog,Ui_Dialog):
         self.sinceMarker=0 # sartopo wants integer milliseconds
         self.markerList=[] # list of all sartopo markers and their ids
 
-        self.ui.newMarkerButton.setEnabled(False)
-        self.ui.editMarkerComboBox.setEnabled(False)
-        self.ui.editMarkerComboBox.featureClass="Marker"
-        self.ui.editMarkerComboBox.headerText="Edit"
+#         self.ui.newMarkerButton.setEnabled(False)
+#         self.ui.existingMarkerComboBox.setEnabled(False)
+        self.ui.existingMarkerComboBox.featureClass="Marker"
+        self.ui.existingMarkerComboBox.headerText="Existing Marker"
         
         self.loadRcFile()
         self.setGeometry(int(self.x),int(self.y),int(self.w),int(self.h))
@@ -159,7 +168,7 @@ class MyWindow(QDialog,Ui_Dialog):
 
         self.featureListWidgetToUpdate={}
         self.featureListWidgetToUpdate["Folder"]=self.optionsDialog.ui.folderComboBox
-        self.featureListWidgetToUpdate["Marker"]=self.ui.editMarkerComboBox
+        self.featureListWidgetToUpdate["Marker"]=self.ui.existingMarkerComboBox
         
         self.since={}
         self.since["Folder"]=0
@@ -169,8 +178,11 @@ class MyWindow(QDialog,Ui_Dialog):
         self.featureListDict["Folder"]=[]
         self.featureListDict["Marker"]=[]
     
+        self.modeChanged()
+        self.ui.goButton.setEnabled(False) # only enable the button when ready
+        
         # use the filter folder combo box selection to filter the edit marker combo box items
-        self.ui.editMarkerComboBox.filterFolderComboBox=self.optionsDialog.ui.folderComboBox
+        self.ui.existingMarkerComboBox.filterFolderComboBox=self.optionsDialog.ui.folderComboBox
         
         QTimer.singleShot(500,lambda:self.optionsDialog.show())
         
@@ -251,8 +263,14 @@ class MyWindow(QDialog,Ui_Dialog):
 
     def createSTS(self):
         if self.optionsDialog.ui.urlField.text():
-            url=self.optionsDialog.ui.urlField.text()
-            parse=url.replace("http://","").split("/")
+            u=self.optionsDialog.ui.urlField.text()
+            if u==self.url: # url has not changed; keep the existing link and folder list
+                return
+            self.url=u
+            if self.url.endswith("#"): # pound sign at end of URL causes crash; brute force fix it here
+                self.url=self.url[:-1]
+                self.optionsDialog.ui.urlField.setText(self.url)
+            parse=self.url.replace("http://","").split("/")
             domainAndPort=parse[0]
             mapID=parse[-1]
             self.sts=SartopoSession(domainAndPort=domainAndPort,mapID=mapID)
@@ -285,13 +303,14 @@ class MyWindow(QDialog,Ui_Dialog):
             if row[0].lower()==addr:
                 self.ui.latField.setText(str(row[1]))
                 self.ui.lonField.setText(str(row[2]))
-                self.ui.newMarkerButton.setEnabled(True)
-                self.ui.editMarkerComboBox.setEnabled(True)
+                self.goButtonSetEnabled()
+                self.ui.existingMarkerComboBox.setEnabled(True)
+                self.updateTimestamp()
                 return
         self.ui.latField.setText("")
         self.ui.lonField.setText("")
-        self.ui.newMarkerButton.setEnabled(False)
-        self.ui.editMarkerComboBox.setEnabled(False)
+        self.goButtonSetEnabled()
+        self.ui.existingMarkerComboBox.setEnabled(False)
 
     def saveRcFile(self):
         print("saving...")
@@ -364,14 +383,22 @@ class MyWindow(QDialog,Ui_Dialog):
         return ' '.join(parse[0:n])
     
     def getMarkerSymbol(self):
-        t=self.ui.markerComboBox.currentText()
+        t=self.ui.markerSymbolComboBox.currentText()
         symbol=markerSymbolDict.get(t,"point")
         return symbol
         
     def addMarker(self):
-        if self.firstMarker:
-            self.folderId=self.sts.addFolder("Addresses")
-            self.firstMarker=False
+#         if self.firstMarker:
+#             self.folderId=self.sts.addFolder("Addresses")
+#             self.firstMarker=False
+        folders=self.sts.getFeatures("Folder")
+        fid=False
+        for folder in folders:
+            if folder["properties"]["title"]=="Addresses":
+                fid=folder["id"]
+        if not fid:
+            fid=self.sts.addFolder("Addresses")
+        self.folderId=fid
         rval=self.sts.addMarker(self.ui.latField.text(),self.ui.lonField.text(),self.getStreetLabel(),"","FF0000",self.getMarkerSymbol(),None,self.folderId)
         print("RESPONSE:"+str(rval))
     
@@ -395,22 +422,29 @@ class MyWindow(QDialog,Ui_Dialog):
                     # if there's a previous version of the same feature (based on ID only),
                     #  remove the previous version from the list
                     for oldFeature in self.featureListDict[featureClass]:
-                        if feature[1]==oldFeature[1]:
+                        if feature["id"]==oldFeature["id"]:
                             self.featureListDict[featureClass].remove(oldFeature)
                     self.featureListDict[featureClass].append(feature)
-                self.featureListDict[featureClass].sort()
+                self.featureListDict[featureClass].sort(key=sortByTitle)
                 
             # recreate the filtered list regardless of whether there were new features in rval    
             items=[]
             for feature in self.featureListDict[featureClass]:
+                id=feature.get("id",0)
+                prop=feature.get("properties",{})
+                name=prop.get("title","UNNAMED")
                 add=True
                 if filterFolderId:
-                    if len(feature)<3 or feature[2]!=filterFolderId:
+                    fid=prop.get("folderId",0)
+                    if fid!=filterFolderId:
                         add=False
-                        print("      filtering out feature:"+str(feature[0]))
+                        print("      filtering out feature:"+str(id))
                 if add:
-                    print("    adding feature:"+str(feature[0]))
-                    items.append(feature)
+                    print("    adding feature:"+str(id))
+                    if featureClass=="Folder":
+                        items.append([name,id])
+                    else:
+                        items.append([name,[id,prop]])
             else:
                 print("no return data, i.e. no new features of this class since the last check")
         else:
@@ -425,18 +459,81 @@ class MyWindow(QDialog,Ui_Dialog):
         self.featureListWidgetToUpdate[featureClass].setItems(items)
         
     def editMarker(self):
-        name=self.ui.editMarkerComboBox.currentText()
-        id=self.ui.editMarkerComboBox.currentData()
+        name=self.ui.existingMarkerComboBox.currentText()
+        data=self.ui.existingMarkerComboBox.currentData()
+        id=data[0]
+        prop=data[1]
         print("editMarker called: selection="+name+"  id="+id)
         # now set current index to -1 so that subsequent focus action will trigger
         #  populateComboBox again (from the highlighted slot)
-        self.sts.addMarker(self.ui.latField.text(),self.ui.lonField.text(),name,existingId=id)
-        self.ui.editMarkerComboBox.setCurrentIndex(0)
+        fid=prop.get("folderId",None)
+        symbol=prop.get("marker-symbol","point")
+        if self.ui.timestampCheckbox.isChecked():
+            description=self.ui.timestampField.text()
+        else:
+            # note this will overwrite the description; is there a good way to choose whether to preserve the current description?
+            description=""
+        self.sts.addMarker(self.ui.latField.text(),self.ui.lonField.text(),name,description=description,symbol=symbol,folderId=fid,existingId=id)
+        self.ui.existingMarkerComboBox.setCurrentIndex(0)
         
     def closeEvent(self,event):
         self.saveRcFile()
         event.accept()
         self.parent.quit()
+        
+    def modeChanged(self):
+        self.mode=self.ui.modeComboBox.currentText()
+        print("mode changed to '"+self.mode+"'")
+        if self.mode=="Add":
+            showAddFields=True
+            showMoveFields=False
+        elif self.mode=="Move":
+            showAddFields=False
+            showMoveFields=True
+            self.ui.existingMarkerComboBox.setCurrentIndex(0)
+            self.updateTimestamp()
+        else:
+            showAddFields=False
+            showMoveFields=False
+        self.ui.markerSymbolComboBox.setEnabled(showAddFields)
+        self.ui.markerSymbolComboBox.setVisible(showAddFields)
+        self.ui.existingMarkerComboBox.setEnabled(showMoveFields)
+        self.ui.existingMarkerComboBox.setVisible(showMoveFields)
+        self.ui.timestampLabel.setVisible(showMoveFields)
+        self.ui.timestampCheckbox.setVisible(showMoveFields)
+        self.ui.timestampField.setEnabled(self.ui.timestampCheckbox.isChecked())
+        self.ui.timestampField.setVisible(showMoveFields)
+        self.goButtonSetEnabled()
+
+    def clearAddress(self):
+        self.ui.addrField.setText("")
+        self.ui.latField.setText("")
+        self.ui.lonField.setText("")
+        self.goButtonSetEnabled()
+    
+    def updateTimestamp(self):
+        self.ui.timestampField.setText(datetime.now().strftime("%H%M"))
+
+    def existingMarkerComboBoxCB(self):
+        self.updateTimestamp()
+        self.goButtonSetEnabled()
+
+    def timestampCheckboxCB(self):
+        self.ui.timestampField.setEnabled(self.ui.timestampCheckbox.isChecked())
+    
+    def goButtonSetEnabled(self):
+        if self.mode=="Add" and (self.ui.latField.text()!=""):
+            self.ui.goButton.setEnabled(True)
+        elif self.mode=="Move" and (self.ui.latField.text()!="" and self.ui.existingMarkerComboBox.currentText()!="Existing Marker"):
+            self.ui.goButton.setEnabled(True)
+        else:
+            self.ui.goButton.setEnabled(False)
+   
+    def go(self):
+        if self.mode=="Add":
+            self.addMarker()
+        elif self.mode=="Move":
+            self.editMarker()
                 
 
 class optionsDialog(QDialog,Ui_optionsDialog):

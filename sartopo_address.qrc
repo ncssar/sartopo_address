@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="sartopo_address">
+    <file>tall_x_icon.png</file>
     <file>sartopo_markers/animal_issue.png</file>
     <file>sartopo_markers/assisted.png</file>
     <file>sartopo_markers/dot.png</file>
