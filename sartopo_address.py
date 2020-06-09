@@ -44,6 +44,8 @@
 #                         add optional timestamp that populates the 'description' field;
 #                         required sartopo_python_min_version increased to 1.0.6
 #                         because entire property set must be returned with each marker
+#   6-9-20    TMG       fix #24: sartopo.com signed requests (requires sartopo_python 1.1.2);
+#                         fix #25: window opens outside of display boundary
 #
 # #############################################################################
 #
@@ -66,6 +68,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+import os
 import sys
 import csv
 import json
@@ -73,7 +76,7 @@ import re
 import time
 from datetime import datetime
 
-sartopo_python_min_version="1.0.6"
+sartopo_python_min_version="1.1.2"
 
 import pkg_resources
 sartopo_python_installed_version=pkg_resources.get_distribution("sartopo-python").version
@@ -120,6 +123,7 @@ class MyWindow(QDialog,Ui_Dialog):
         self.ui=Ui_Dialog()
         self.ui.setupUi(self)
         self.locationFile="sartopo_address.csv"
+        self.accountName=""
         self.optionsDialog=optionsDialog(self)
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_DeleteOnClose)
@@ -164,7 +168,7 @@ class MyWindow(QDialog,Ui_Dialog):
         self.ui.addrField.textChanged.connect(self.lookupFromAddrField)
         self.ui.optionsButton.clicked.connect(self.optionsDialog.show)
         
-        self.optionsDialog.ui.urlField.editingFinished.connect(self.createSTS)
+#         self.optionsDialog.ui.urlField.editingFinished.connect(self.createSTS)
 
         self.featureListWidgetToUpdate={}
         self.featureListWidgetToUpdate["Folder"]=self.optionsDialog.ui.folderComboBox
@@ -270,10 +274,16 @@ class MyWindow(QDialog,Ui_Dialog):
             if self.url.endswith("#"): # pound sign at end of URL causes crash; brute force fix it here
                 self.url=self.url[:-1]
                 self.optionsDialog.ui.urlField.setText(self.url)
-            parse=self.url.replace("http://","").split("/")
+            parse=self.url.replace("http://","").replace("https://","").split("/")
             domainAndPort=parse[0]
             mapID=parse[-1]
-            self.sts=SartopoSession(domainAndPort=domainAndPort,mapID=mapID)
+            print("calling SartopoSession with domainAndPort="+domainAndPort+" mapID="+mapID)
+            if 'sartopo.com' in domainAndPort.lower():
+                self.sts=SartopoSession(domainAndPort=domainAndPort,mapID=mapID,
+                                        configpath="../sts.ini",
+                                        account=self.accountName)
+            else:
+                self.sts=SartopoSession(domainAndPort=domainAndPort,mapID=mapID)
             self.link=self.sts.apiVersion
             self.ui.linkIndicator.setText(mapID)
             print("link status:"+str(self.link))
@@ -326,6 +336,7 @@ class MyWindow(QDialog,Ui_Dialog):
         out=QTextStream(rcFile)
         out << "[sartopo_address]\n"
         out << "locationFile=" << self.locationFile << "\n"
+        out << "accountName=" << self.accountName << "\n"
         out << "x=" << x << "\n"
         out << "y=" << y << "\n"
         out << "w=" << w << "\n"
@@ -365,8 +376,15 @@ class MyWindow(QDialog,Ui_Dialog):
                 self.h=int(tokens[1])
             elif tokens[0]=="locationFile":
                 self.locationFile=tokens[1]
+            elif tokens[0]=="accountName":
+                self.accountName=tokens[1]
             elif tokens[0]=="font-size":
                 self.fontSize=int(tokens[1].replace('pt',''))
+        d=QApplication.desktop()
+        if self.x > d.availableGeometry(self).width():
+            self.x=300
+        if self.y > d.availableGeometry(self).height():
+            self.y=300
         rcFile.close()
     
     def getStreetLabel(self):
@@ -543,6 +561,7 @@ class optionsDialog(QDialog,Ui_optionsDialog):
         self.ui=Ui_optionsDialog()
         self.ui.setupUi(self)
         self.ui.locationFileField.setText(self.parent.locationFile)
+        self.ui.accountNameField.setText(self.parent.accountName)
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.setWindowFlags((self.windowFlags() | Qt.WindowStaysOnTopHint) & ~Qt.WindowMinMaxButtonsHint & ~Qt.WindowContextHelpButtonHint)
         self.setFixedSize(self.size())
@@ -555,6 +574,8 @@ class optionsDialog(QDialog,Ui_optionsDialog):
         # which could lead to accidental editing
         self.ui.locationFileField.clearFocus()
         self.ui.locationFileField.setText(self.parent.locationFile)
+        self.ui.accountNameField.clearFocus()
+        self.ui.accountNameField.setText(self.parent.accountName)
         self.ui.urlField.setFocus()
     
     def updateFeatureList(self,featureClass,filterFolderId):
@@ -582,6 +603,35 @@ class optionsDialog(QDialog,Ui_optionsDialog):
 #         self.parent.addrTable=[[]]
         self.parent.buildTableFromCsv(self.ui.locationFileField.text())
         self.displayLocationCount()
+    
+    def urlEditingFinished(self):
+        url=self.ui.urlField.text()
+        online="sartopo.com" in url.lower()
+        self.ui.label_4.setEnabled(online)
+        self.ui.accountNameField.setEnabled(online)
+        if online: # in an online map, make sure account is specified, then try to create session
+            if self.ui.accountNameField.text()!="":
+                self.parent.createSTS()
+            else:
+                self.ui.accountNameField.setFocus()
+        else: # if a local map, try to create the session immediately
+            self.parent.createSTS()
+        
+    def accountNameEditingFinished(self):
+        an=self.ui.accountNameField.text()
+        self.parent.accountName=an
+        self.parent.createSTS()
+        
+    def locationFileEditingFinished(self):
+        lf=self.ui.locationFileField.text()
+        if not os.path.isfile(lf):
+            warn=QMessageBox(QMessageBox.Warning,"Error","Specified location file "+lf+" does not exist.",
+                    QMessageBox.Ok,self,Qt.WindowTitleHint|Qt.WindowCloseButtonHint|Qt.Dialog|Qt.MSWindowsFixedSizeDialogHint|Qt.WindowStaysOnTopHint)
+            warn.show()
+            warn.raise_()
+            warn.exec_()
+            return
+        self.parent.locationFile=lf
         
         
 class MyTableModel(QAbstractTableModel):
