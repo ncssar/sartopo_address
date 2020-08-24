@@ -46,6 +46,7 @@
 #                         because entire property set must be returned with each marker
 #   6-9-20    TMG       fix #24: sartopo.com signed requests (requires sartopo_python 1.1.2);
 #                         fix #25: window opens outside of display boundary
+#   8-24-20   TMG       fix #29: esc should not close main window
 #
 # #############################################################################
 #
@@ -199,6 +200,11 @@ class MyWindow(QDialog,Ui_Dialog):
 #         tt2=QToolTip(self.ui)
 
 #         self.getUrl()
+
+	# prevent 'esc' from closing the newEntryWindow - copied from radiolog
+    def keyPressEvent(self,event):
+        if event.key()!=Qt.Key_Escape:
+            QDialog.keyPressEvent(self,event)
     
     def buildTableFromCsv(self,fileName):
         self.addrTable=[["","",""]]
