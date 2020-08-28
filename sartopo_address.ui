@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SARTopo Offline Address Search</string>
+   <string>SARTopo Address Tool</string>
   </property>
   <widget class="QLineEdit" name="addrField">
    <property name="geometry">
@@ -29,36 +29,32 @@
     </font>
    </property>
   </widget>
-  <widget class="QLineEdit" name="latField">
+  <widget class="QLineEdit" name="latLonField">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>39</x>
-     <y>49</y>
-     <width>166</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="focusPolicy">
-    <enum>Qt::NoFocus</enum>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="lonField">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>256</x>
+     <x>276</x>
      <y>48</y>
-     <width>167</width>
+     <width>195</width>
      <height>22</height>
     </rect>
    </property>
    <property name="focusPolicy">
     <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background:#f0f0f0;color:#666666</string>
+   </property>
+   <property name="dragEnabled">
+    <bool>true</bool>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+   <property name="placeholderText">
+    <string>Lat/Lon (D.d)</string>
    </property>
   </widget>
   <widget class="QLabel" name="label">
@@ -79,44 +75,12 @@
     <string>Address</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>-24</x>
-     <y>53</y>
-     <width>53</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Lat</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_3">
-   <property name="geometry">
-    <rect>
-     <x>185</x>
-     <y>53</y>
-     <width>64</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Lon</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
   <widget class="QLabel" name="locationCountLabel">
    <property name="geometry">
     <rect>
-     <x>108</x>
-     <y>78</y>
-     <width>176</width>
+     <x>96</x>
+     <y>49</y>
+     <width>161</width>
      <height>20</height>
     </rect>
    </property>
@@ -130,11 +94,16 @@
   <widget class="QPushButton" name="optionsButton">
    <property name="geometry">
     <rect>
-     <x>469</x>
-     <y>49</y>
-     <width>41</width>
-     <height>41</height>
+     <x>478</x>
+     <y>44</y>
+     <width>32</width>
+     <height>32</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
    </property>
    <property name="focusPolicy">
     <enum>Qt::NoFocus</enum>
@@ -148,8 +117,8 @@
    </property>
    <property name="iconSize">
     <size>
-     <width>30</width>
-     <height>30</height>
+     <width>24</width>
+     <height>24</height>
     </size>
    </property>
   </widget>
@@ -159,10 +128,10 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>111</x>
-     <y>112</y>
-     <width>285</width>
-     <height>39</height>
+     <x>92</x>
+     <y>78</y>
+     <width>245</width>
+     <height>38</height>
     </rect>
    </property>
    <property name="font">
@@ -307,10 +276,10 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>44</x>
-     <y>75</y>
-     <width>67</width>
-     <height>29</height>
+     <x>38</x>
+     <y>46</y>
+     <width>56</width>
+     <height>26</height>
     </rect>
    </property>
    <property name="font">
@@ -328,23 +297,26 @@
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>11</x>
-     <y>83</y>
+     <x>0</x>
+     <y>50</y>
      <width>32</width>
-     <height>16</height>
+     <height>18</height>
     </rect>
    </property>
    <property name="text">
-    <string>Map:</string>
+    <string>Map</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QPushButton" name="goButton">
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>96</y>
+     <y>84</y>
      <width>70</width>
-     <height>56</height>
+     <height>60</height>
     </rect>
    </property>
    <property name="font">
@@ -366,16 +338,16 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>9</x>
-     <y>112</y>
-     <width>88</width>
-     <height>39</height>
+     <x>11</x>
+     <y>78</y>
+     <width>74</width>
+     <height>38</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Segoe UI</family>
-     <pointsize>12</pointsize>
+     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="focusPolicy">
@@ -412,16 +384,16 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>111</x>
-     <y>112</y>
-     <width>169</width>
-     <height>39</height>
+     <x>92</x>
+     <y>78</y>
+     <width>245</width>
+     <height>38</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Segoe UI</family>
-     <pointsize>12</pointsize>
+     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="focusPolicy">
@@ -448,42 +420,48 @@
   <widget class="QLineEdit" name="timestampField">
    <property name="geometry">
     <rect>
-     <x>369</x>
-     <y>117</y>
-     <width>64</width>
-     <height>29</height>
+     <x>343</x>
+     <y>94</y>
+     <width>88</width>
+     <height>23</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>12</pointsize>
+     <pointsize>10</pointsize>
     </font>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
   <widget class="QLabel" name="timestampLabel">
    <property name="geometry">
     <rect>
-     <x>298</x>
-     <y>111</y>
+     <x>342</x>
+     <y>72</y>
      <width>47</width>
-     <height>37</height>
+     <height>22</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Segoe UI</family>
-     <pointsize>12</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">
     <string>Time</string>
    </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
   </widget>
   <widget class="QCheckBox" name="timestampCheckbox">
    <property name="geometry">
     <rect>
-     <x>348</x>
-     <y>121</y>
+     <x>405</x>
+     <y>73</y>
      <width>30</width>
      <height>20</height>
     </rect>
@@ -493,6 +471,12 @@
    </property>
    <property name="text">
     <string/>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
    </property>
    <property name="checked">
     <bool>true</bool>
@@ -522,6 +506,77 @@
      <width>12</width>
      <height>30</height>
     </size>
+   </property>
+  </widget>
+  <widget class="STSFeatureComboBox" name="folderComboBox">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>11</x>
+     <y>124</y>
+     <width>177</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="editable">
+    <bool>false</bool>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>30</width>
+     <height>30</height>
+    </size>
+   </property>
+   <property name="frame">
+    <bool>true</bool>
+   </property>
+   <item>
+    <property name="text">
+     <string>Folder</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLineEdit" name="commentField">
+   <property name="geometry">
+    <rect>
+     <x>271</x>
+     <y>125</y>
+     <width>160</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>196</x>
+     <y>127</y>
+     <width>70</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Comment</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
  </widget>
@@ -559,8 +614,8 @@
    <slot>modeChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>79</x>
-     <y>117</y>
+     <x>81</x>
+     <y>83</y>
     </hint>
     <hint type="destinationlabel">
      <x>122</x>
@@ -607,8 +662,8 @@
    <slot>timestampCheckboxCB()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>355</x>
-     <y>129</y>
+     <x>412</x>
+     <y>81</y>
     </hint>
     <hint type="destinationlabel">
      <x>397</x>
@@ -623,12 +678,28 @@
    <slot>existingMarkerComboBoxCB()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>213</x>
-     <y>127</y>
+     <x>204</x>
+     <y>114</y>
     </hint>
     <hint type="destinationlabel">
      <x>247</x>
      <y>104</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>markerSymbolComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>Dialog</receiver>
+   <slot>markerSymbolComboBoxCB()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>227</x>
+     <y>86</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>252</x>
+     <y>151</y>
     </hint>
    </hints>
   </connection>
@@ -646,5 +717,8 @@
   <slot>timestampCheckboxCB()</slot>
   <slot>goButtonSetEnable()</slot>
   <slot>existingMarkerComboBoxCB()</slot>
+  <slot>folderComboBoxActivated()</slot>
+  <slot>center()</slot>
+  <slot>markerSymbolComboBoxCB()</slot>
  </slots>
 </ui>
