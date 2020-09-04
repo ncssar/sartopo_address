@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>399</width>
-    <height>173</height>
+    <width>454</width>
+    <height>253</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,11 +16,16 @@
   <widget class="QLabel" name="locationCountLabel">
    <property name="geometry">
     <rect>
-     <x>47</x>
-     <y>143</y>
+     <x>96</x>
+     <y>223</y>
      <width>181</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
    <property name="text">
     <string>0 Locations loaded</string>
@@ -32,8 +37,8 @@
   <widget class="QPushButton" name="reloadButton">
    <property name="geometry">
     <rect>
-     <x>244</x>
-     <y>137</y>
+     <x>293</x>
+     <y>217</y>
      <width>30</width>
      <height>30</height>
     </rect>
@@ -55,34 +60,50 @@
   <widget class="QLineEdit" name="locationFileField">
    <property name="geometry">
     <rect>
-     <x>11</x>
-     <y>107</y>
-     <width>297</width>
+     <x>15</x>
+     <y>130</y>
+     <width>342</width>
      <height>26</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
   </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>91</y>
-     <width>160</width>
-     <height>16</height>
+     <x>15</x>
+     <y>110</y>
+     <width>161</width>
+     <height>20</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
    <property name="text">
     <string>Location Lookup File (.csv):</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="browseButton">
+  <widget class="QPushButton" name="browseForLocationFileButton">
    <property name="geometry">
     <rect>
-     <x>318</x>
-     <y>106</y>
-     <width>75</width>
+     <x>370</x>
+     <y>129</y>
+     <width>71</width>
      <height>28</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>Browse</string>
@@ -91,11 +112,17 @@
   <widget class="QPushButton" name="closeButton">
    <property name="geometry">
     <rect>
-     <x>300</x>
-     <y>139</y>
+     <x>349</x>
+     <y>219</y>
      <width>93</width>
      <height>28</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>Close</string>
@@ -104,34 +131,50 @@
   <widget class="STSFeatureComboBox" name="folderComboBox">
    <property name="geometry">
     <rect>
-     <x>244</x>
-     <y>65</y>
-     <width>148</width>
-     <height>22</height>
+     <x>257</x>
+     <y>83</y>
+     <width>185</width>
+     <height>25</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>65</y>
-     <width>233</width>
+     <x>14</x>
+     <y>85</y>
+     <width>232</width>
      <height>20</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
    <property name="text">
-    <string>Only list existing labels from fodler(s):</string>
+    <string>Only list existing markers from fodler(s):</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>9</x>
-     <y>7</y>
-     <width>95</width>
+     <x>13</x>
+     <y>16</y>
+     <width>127</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>10</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>Saved map URL:</string>
@@ -140,11 +183,17 @@
   <widget class="QLineEdit" name="urlField">
    <property name="geometry">
     <rect>
-     <x>107</x>
+     <x>141</x>
      <y>6</y>
-     <width>261</width>
-     <height>22</height>
+     <width>276</width>
+     <height>36</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>11</pointsize>
+    </font>
    </property>
   </widget>
   <widget class="QLineEdit" name="linkIndicator">
@@ -153,10 +202,10 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>373</x>
-     <y>8</y>
-     <width>20</width>
-     <height>16</height>
+     <x>421</x>
+     <y>5</y>
+     <width>22</width>
+     <height>38</height>
     </rect>
    </property>
    <property name="font">
@@ -165,17 +214,22 @@
     </font>
    </property>
   </widget>
-  <widget class="QLabel" name="label_4">
+  <widget class="QLabel" name="accountNameLabel">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>9</x>
-     <y>35</y>
-     <width>160</width>
+     <x>15</x>
+     <y>54</y>
+     <width>170</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
    <property name="text">
     <string>Sartopo.com account name:</string>
@@ -187,11 +241,68 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>176</x>
-     <y>34</y>
-     <width>192</width>
+     <x>187</x>
+     <y>54</y>
+     <width>255</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="markerFileField">
+   <property name="geometry">
+    <rect>
+     <x>15</x>
+     <y>180</y>
+     <width>342</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="browseForMarkerFileButton">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>179</y>
+     <width>71</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Browse</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>15</x>
+     <y>160</y>
+     <width>179</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
+   <property name="text">
+    <string>Marker Definition File (.csv):</string>
    </property>
   </widget>
  </widget>
@@ -202,6 +313,18 @@
    <header location="global"> STSFeatureComboBox.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>urlField</tabstop>
+  <tabstop>accountNameField</tabstop>
+  <tabstop>folderComboBox</tabstop>
+  <tabstop>locationFileField</tabstop>
+  <tabstop>browseForLocationFileButton</tabstop>
+  <tabstop>markerFileField</tabstop>
+  <tabstop>browseForMarkerFileButton</tabstop>
+  <tabstop>reloadButton</tabstop>
+  <tabstop>closeButton</tabstop>
+  <tabstop>linkIndicator</tabstop>
+ </tabstops>
  <resources>
   <include location="sartopo_address.qrc"/>
  </resources>
@@ -213,28 +336,12 @@
    <slot>reload()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>264</x>
-     <y>147</y>
+     <x>313</x>
+     <y>227</y>
     </hint>
     <hint type="destinationlabel">
      <x>320</x>
      <y>139</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>browseButton</sender>
-   <signal>clicked()</signal>
-   <receiver>optionsDialog</receiver>
-   <slot>browseForFile()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>339</x>
-     <y>130</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>360</x>
-     <y>69</y>
     </hint>
    </hints>
   </connection>
@@ -245,8 +352,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>308</x>
-     <y>151</y>
+     <x>357</x>
+     <y>231</y>
     </hint>
     <hint type="destinationlabel">
      <x>287</x>
@@ -271,34 +378,98 @@
    </hints>
   </connection>
   <connection>
-   <sender>accountNameField</sender>
-   <signal>editingFinished()</signal>
-   <receiver>optionsDialog</receiver>
-   <slot>accountNameEditingFinished()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>199</x>
-     <y>43</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>59</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>locationFileField</sender>
    <signal>editingFinished()</signal>
    <receiver>optionsDialog</receiver>
    <slot>locationFileEditingFinished()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>43</x>
-     <y>118</y>
+     <x>47</x>
+     <y>141</y>
     </hint>
     <hint type="destinationlabel">
      <x>24</x>
      <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>folderComboBox</sender>
+   <signal>currentIndexChanged(QString)</signal>
+   <receiver>optionsDialog</receiver>
+   <slot>folderComboBoxIndexChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>291</x>
+     <y>93</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>236</x>
+     <y>91</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>markerFileField</sender>
+   <signal>editingFinished()</signal>
+   <receiver>optionsDialog</receiver>
+   <slot>markerFileEditingFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>124</x>
+     <y>189</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>79</x>
+     <y>183</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>browseForMarkerFileButton</sender>
+   <signal>clicked()</signal>
+   <receiver>optionsDialog</receiver>
+   <slot>browseForMarkerFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>413</x>
+     <y>195</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>180</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>browseForLocationFileButton</sender>
+   <signal>clicked()</signal>
+   <receiver>optionsDialog</receiver>
+   <slot>browseForLocationFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>432</x>
+     <y>148</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>387</x>
+     <y>141</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>accountNameField</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>optionsDialog</receiver>
+   <slot>accountNameTextChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>204</x>
+     <y>64</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>156</x>
+     <y>76</y>
     </hint>
    </hints>
   </connection>
@@ -309,5 +480,10 @@
   <slot>urlEditingFinished()</slot>
   <slot>accountNameEditingFinished()</slot>
   <slot>locationFileEditingFinished()</slot>
+  <slot>folderComboBoxIndexChanged()</slot>
+  <slot>markerFileEditingFinished()</slot>
+  <slot>browseForMarkerFile()</slot>
+  <slot>browseForLocationFile()</slot>
+  <slot>accountNameTextChanged()</slot>
  </slots>
 </ui>

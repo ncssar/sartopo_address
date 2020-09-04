@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>522</width>
-    <height>162</height>
+    <width>516</width>
+    <height>157</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,9 +37,14 @@
     <rect>
      <x>276</x>
      <y>48</y>
-     <width>195</width>
+     <width>193</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
    <property name="focusPolicy">
     <enum>Qt::NoFocus</enum>
@@ -48,7 +53,7 @@
     <string notr="true">background:#f0f0f0;color:#666666</string>
    </property>
    <property name="dragEnabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="readOnly">
     <bool>true</bool>
@@ -80,9 +85,15 @@
     <rect>
      <x>96</x>
      <y>49</y>
-     <width>161</width>
+     <width>171</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>8</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>0 Locations loaded</string>
@@ -94,10 +105,10 @@
   <widget class="QPushButton" name="optionsButton">
    <property name="geometry">
     <rect>
-     <x>478</x>
+     <x>473</x>
      <y>44</y>
-     <width>32</width>
-     <height>32</height>
+     <width>37</width>
+     <height>37</height>
     </rect>
    </property>
    <property name="font">
@@ -276,10 +287,10 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>38</x>
-     <y>46</y>
+     <x>46</x>
+     <y>44</y>
      <width>56</width>
-     <height>26</height>
+     <height>28</height>
     </rect>
    </property>
    <property name="font">
@@ -297,11 +308,17 @@
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>50</y>
+     <x>8</x>
+     <y>49</y>
      <width>32</width>
      <height>18</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>Map</string>
@@ -314,9 +331,9 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>84</y>
+     <y>85</y>
      <width>70</width>
-     <height>60</height>
+     <height>64</height>
     </rect>
    </property>
    <property name="font">
@@ -422,7 +439,7 @@
     <rect>
      <x>343</x>
      <y>94</y>
-     <width>88</width>
+     <width>91</width>
      <height>23</height>
     </rect>
    </property>
@@ -514,9 +531,9 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>11</x>
-     <y>124</y>
-     <width>177</width>
+     <x>55</x>
+     <y>123</y>
+     <width>185</width>
      <height>27</height>
     </rect>
    </property>
@@ -543,16 +560,16 @@
    </property>
    <item>
     <property name="text">
-     <string>Folder</string>
+     <string>Addresses</string>
     </property>
    </item>
   </widget>
   <widget class="QLineEdit" name="commentField">
    <property name="geometry">
     <rect>
-     <x>271</x>
+     <x>318</x>
      <y>125</y>
-     <width>160</width>
+     <width>116</width>
      <height>25</height>
     </rect>
    </property>
@@ -560,10 +577,10 @@
   <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>196</x>
-     <y>127</y>
-     <width>70</width>
-     <height>22</height>
+     <x>244</x>
+     <y>124</y>
+     <width>71</width>
+     <height>27</height>
     </rect>
    </property>
    <property name="font">
@@ -574,6 +591,28 @@
    </property>
    <property name="text">
     <string>Comment</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="folderLabel">
+   <property name="geometry">
+    <rect>
+     <x>4</x>
+     <y>125</y>
+     <width>48</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Folder</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -619,7 +658,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>122</x>
-     <y>157</y>
+     <y>156</y>
     </hint>
    </hints>
   </connection>
@@ -635,7 +674,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>480</x>
-     <y>160</y>
+     <y>156</y>
     </hint>
    </hints>
   </connection>

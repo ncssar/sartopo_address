@@ -128,6 +128,7 @@ class MyWindow(QDialog,Ui_Dialog):
 		self.locationFileName="sartopo_address.csv"
 		self.markerFileName="sartopo_markers.csv"
 		self.accountName=""
+		self.previousComment=""
 		self.optionsDialog=optionsDialog(self)
 		self.setWindowFlags(Qt.WindowStaysOnTopHint)
 		self.setAttribute(Qt.WA_DeleteOnClose)
@@ -147,19 +148,17 @@ class MyWindow(QDialog,Ui_Dialog):
 		self.sinceMarker=0 # sartopo wants integer milliseconds
 		self.markerList=[] # list of all sartopo markers and their ids
 
-#         self.ui.newMarkerButton.setEnabled(False)
-#         self.ui.existingMarkerComboBox.setEnabled(False)
 		self.ui.existingMarkerComboBox.featureClass="Marker"
 		self.ui.existingMarkerComboBox.headerText="Existing Marker"
 		
 		self.ui.folderComboBox.featureClass="Folder"
-		self.ui.folderComboBox.headerText="Folder"
+		# self.ui.folderComboBox.headerText="Folder"
 
-		self.loadMarkerFile()
 		self.loadRcFile()
+		self.loadMarkerFile()
+
 		self.setGeometry(int(self.x),int(self.y),int(self.w),int(self.h))
 		self.buildTableFromCsv(self.locationFileName)
-#         self.ui.locationCountLabel.setText(str(len(self.addrTable))+" locations loaded")
 		
 		self.addrTableModel=MyTableModel(self.addrTable,self)
 		
@@ -177,11 +176,8 @@ class MyWindow(QDialog,Ui_Dialog):
 		self.ui.addrField.setCompleter(self.completer)
 		self.ui.addrField.textChanged.connect(self.lookupFromAddrField)
 		self.ui.optionsButton.clicked.connect(self.optionsDialog.show)
-		
-#         self.optionsDialog.ui.urlField.editingFinished.connect(self.createSTS)
 
 		self.featureListWidgetsToUpdate={}
-		# self.featureListWidgetToUpdate["Folder"]=self.optionsDialog.ui.folderComboBox
 		self.featureListWidgetsToUpdate["Folder"]=[self.ui.folderComboBox,self.optionsDialog.ui.folderComboBox]
 		self.featureListWidgetsToUpdate["Marker"]=[self.ui.existingMarkerComboBox]
 		
@@ -200,16 +196,6 @@ class MyWindow(QDialog,Ui_Dialog):
 		self.ui.existingMarkerComboBox.filterFolderComboBox=self.optionsDialog.ui.folderComboBox
 		
 		QTimer.singleShot(500,lambda:self.optionsDialog.show())
-		
-#         box=QLabel("BOX",self.ui.optionsButton)
-#         box.setStyleSheet("background:blue;border:2px outset green")
-#         box.setGeometry(-10,-10,25,25)
-#         self.ui.optionsButton.setToolTip("stuff")
-#         self.ui.optionsButton.showText([100,100],"stuff1")
-#         tt1=QToolTip(self.ui)
-#         tt2=QToolTip(self.ui)
-
-#         self.getUrl()
 
 	# prevent 'esc' from closing the newEntryWindow - copied from radiolog
 	def keyPressEvent(self,event):
@@ -274,7 +260,7 @@ class MyWindow(QDialog,Ui_Dialog):
 			self.optionsDialog.ui.locationCountLabel.setText(str(n)+" locations loaded")
 
 	def updateLinkIndicator(self):
-		if self.link>0:
+		if self.link==1:
 			self.ui.linkIndicator.setStyleSheet("background-color:#00ff00")
 			self.optionsDialog.ui.linkIndicator.setStyleSheet("background-color:#00ff00")
 		else:
@@ -282,6 +268,15 @@ class MyWindow(QDialog,Ui_Dialog):
 			self.optionsDialog.ui.linkIndicator.setStyleSheet("background-color:#ff0000")
 
 	def createSTS(self):
+		print("\ncreateSTS called:")
+		if self.sts is not None: # close out any previous session
+			print("Closing previous SartopoSession")
+			self.sts=None
+			self.ui.linkIndicator.setText("")
+			self.updateLinkIndicator()
+			self.link=-1
+			self.updateFeatureList("Folder")
+			self.updateFeatureList("Marker")
 		if self.optionsDialog.ui.urlField.text():
 			u=self.optionsDialog.ui.urlField.text()
 			if u==self.url: # url has not changed; keep the existing link and folder list
@@ -302,10 +297,12 @@ class MyWindow(QDialog,Ui_Dialog):
 			else:
 				self.sts=SartopoSession(domainAndPort=domainAndPort,mapID=mapID)
 			self.link=self.sts.apiVersion
-			self.ui.linkIndicator.setText(mapID)
 			print("link status:"+str(self.link))
 			self.updateLinkIndicator()
-			self.updateFeatureList("Folder")
+			if self.link>0:
+				self.ui.linkIndicator.setText(self.sts.mapID)
+				self.updateFeatureList("Folder")
+			self.optionsDialog.ui.folderComboBox.setHeader("Select a Folder...")
 			
 	# def folderComboBoxActivated(self):
 	# 	self.featureListWidgetToUpdate["Folder"]=self.ui.folderComboBox
@@ -361,6 +358,7 @@ class MyWindow(QDialog,Ui_Dialog):
 		out=QTextStream(rcFile)
 		out << "[sartopo_address]\n"
 		out << "locationFileName=" << self.locationFileName << "\n"
+		out << "markerFileName=" << self.markerFileName << "\n"
 		out << "accountName=" << self.accountName << "\n"
 		out << "x=" << x << "\n"
 		out << "y=" << y << "\n"
@@ -405,7 +403,7 @@ class MyWindow(QDialog,Ui_Dialog):
 
 	def markerSymbolComboBoxCB(self):
 		data=self.ui.markerSymbolComboBox.currentData()
-		print("data:"+str(data))
+		print("\nmarkerSymbolComboBoxCB called:\n  folderComboBox items:"+str(self.ui.folderComboBox.getItems())+"\n  currentData:"+str(data))
 		if data is not None and isinstance(data,list):
 			self.markerSymbol=data[0]
 			self.markerFolder=data[1]
@@ -413,10 +411,13 @@ class MyWindow(QDialog,Ui_Dialog):
 			#  the edit text has less desirable behavior: if you click the combo box pulldown, the
 			#  edit text is gone.  If unused, that's OK, because the folder combo box refreshes
 			#  itself from the actual list of folders on the map for each new marker anyway.
-			if self.markerFolder not in [self.ui.folderComboBox.itemText(i) for i in range(self.ui.folderComboBox.count())]:
-				self.ui.folderComboBox.addItem(self.markerFolder)
-				self.ui.folderComboBox.extraItems=[self.markerFolder] # so that it remains after refresh
-			self.ui.folderComboBox.setCurrentText(self.markerFolder)
+			# if self.markerFolder not in [self.ui.folderComboBox.itemText(i) for i in range(self.ui.folderComboBox.count())]:
+			# 	self.ui.folderComboBox.addItem(self.markerFolder)
+			# 	self.ui.folderComboBox.extraItems=[self.markerFolder] # so that it remains after refresh
+			# self.ui.folderComboBox.setCurrentText(self.markerFolder)
+			self.ui.folderComboBox.headerText=self.markerFolder
+			self.ui.folderComboBox.setHeader(self.markerFolder)
+			self.ui.folderComboBox.setCurrentIndex(0)
 
 	def loadRcFile(self):
 		print("loading rc file "+self.rcFileName+"...")
@@ -451,6 +452,8 @@ class MyWindow(QDialog,Ui_Dialog):
 				self.h=int(tokens[1])
 			elif tokens[0]=="locationFileName":
 				self.locationFileName=tokens[1]
+			elif tokens[0]=="markerFileName":
+				self.markerFileName=tokens[1]
 			elif tokens[0]=="accountName":
 				self.accountName=tokens[1]
 			elif tokens[0]=="font-size":
@@ -481,7 +484,7 @@ class MyWindow(QDialog,Ui_Dialog):
 	# 	return symbol
 
 	def getDescription(self):
-		d=self.ui.commentField.text()
+		d=re.sub(" \[\d\d\d\d\.\d\d\d\d]","",self.ui.commentField.text())
 		if self.ui.timestampCheckbox.isChecked():
 			if d!="":
 				d+=" "
@@ -564,8 +567,11 @@ class MyWindow(QDialog,Ui_Dialog):
 		print("  unfiltered list:"+str(self.featureListDict[featureClass]))
 		print("  filtered list:"+str(items))
 		
+		# add custom default folder at start of list if needed
+		
 		# update the specified combo box's items
 		for w in self.featureListWidgetsToUpdate[featureClass]:
+			print("updating "+str(w.objectName()))
 			w.setItems(items)
 		
 	def editMarker(self):
@@ -604,12 +610,14 @@ class MyWindow(QDialog,Ui_Dialog):
 		self.ui.markerSymbolComboBox.setEnabled(showAddFields)
 		self.ui.markerSymbolComboBox.setVisible(showAddFields)
 		self.ui.folderComboBox.setVisible(showAddFields)
+		self.ui.folderLabel.setVisible(showAddFields)
 		self.ui.existingMarkerComboBox.setEnabled(showMoveFields)
 		self.ui.existingMarkerComboBox.setVisible(showMoveFields)
 		# self.ui.timestampLabel.setVisible(showMoveFields)
 		# self.ui.timestampCheckbox.setVisible(showMoveFields)
 		# self.ui.timestampField.setEnabled(self.ui.timestampCheckbox.isChecked())
 		# self.ui.timestampField.setVisible(showMoveFields)
+		self.ui.commentField.setText("")
 		self.goButtonSetEnabled()
 
 	def clearAddress(self):
@@ -623,9 +631,29 @@ class MyWindow(QDialog,Ui_Dialog):
 	def existingMarkerComboBoxCB(self):
 		self.updateTimestamp()
 		self.goButtonSetEnabled()
+		box=self.ui.existingMarkerComboBox
+		data=box.currentData()
+		self.ui.commentField.setText("")
+		print("Existing marker selected:"+str(box.currentText()))		
+		if data is not None:
+			try:
+				print("  data:"+str(box.currentData()))
+				print("    json:"+str(box.currentData()[1]))
+				self.previousComment=box.currentData()[1]["description"]
+				print("  comment:"+str(self.previousComment))
+				self.updateComment()
+			except:
+				pass
+
+	def updateComment(self):
+		if self.mode=="Move":
+			self.ui.commentField.setText(self.previousComment)
+			if self.ui.timestampCheckbox.isChecked():
+				self.ui.commentField.setText(re.sub("\[\d\d\d\d\.\d\d\d\d]","["+self.ui.timestampField.text()+"]",self.previousComment))
 
 	def timestampCheckboxCB(self):
 		self.ui.timestampField.setEnabled(self.ui.timestampCheckbox.isChecked())
+		self.updateComment()
 	
 	def goButtonSetEnabled(self):
 		if self.mode=="Add" and self.lat!=None:
@@ -649,6 +677,7 @@ class optionsDialog(QDialog,Ui_optionsDialog):
 		self.ui=Ui_optionsDialog()
 		self.ui.setupUi(self)
 		self.ui.locationFileField.setText(self.parent.locationFileName)
+		self.ui.markerFileField.setText(self.parent.markerFileName)
 		self.ui.accountNameField.setText(self.parent.accountName)
 		self.setWindowFlags(Qt.WindowStaysOnTopHint)
 		self.setWindowFlags((self.windowFlags() | Qt.WindowStaysOnTopHint) & ~Qt.WindowMinMaxButtonsHint & ~Qt.WindowContextHelpButtonHint)
@@ -662,6 +691,8 @@ class optionsDialog(QDialog,Ui_optionsDialog):
 		# which could lead to accidental editing
 		self.ui.locationFileField.clearFocus()
 		self.ui.locationFileField.setText(self.parent.locationFileName)
+		self.ui.markerFileField.clearFocus()
+		self.ui.markerFileField.setText(self.parent.markerFileName)
 		self.ui.accountNameField.clearFocus()
 		self.ui.accountNameField.setText(self.parent.accountName)
 		self.ui.urlField.setFocus()
@@ -672,8 +703,22 @@ class optionsDialog(QDialog,Ui_optionsDialog):
 	def displayLocationCount(self):
 		self.ui.locationCountLabel.setText(str(len(self.parent.addrTable))+" locations loaded")
 		self.parent.ui.locationCountLabel.setText(str(len(self.parent.addrTable))+" locations loaded")
-	
-	def browseForFile(self):
+
+	def browseForMarkerFile(self):
+		fileDialog=QFileDialog()
+		fileDialog.setOption(QFileDialog.DontUseNativeDialog)
+		fileDialog.setWindowFlags(Qt.WindowStaysOnTopHint)
+#         fileDialog.setProxyModel(CSVFileSortFilterProxyModel(self))
+		fileDialog.setNameFilter("CSV Marker Definition Files (*.csv)")
+#         fileDialog.setDirectory(self.firstWorkingDir)
+		if fileDialog.exec_():
+			fileName=fileDialog.selectedFiles()[0]
+			self.ui.markerFileField.setText(fileName)
+			self.parent.markerFileName=fileName
+		else: # user pressed cancel on the file browser dialog
+			return
+
+	def browseForLocationFile(self):
 		fileDialog=QFileDialog()
 		fileDialog.setOption(QFileDialog.DontUseNativeDialog)
 		fileDialog.setWindowFlags(Qt.WindowStaysOnTopHint)
@@ -695,7 +740,7 @@ class optionsDialog(QDialog,Ui_optionsDialog):
 	def urlEditingFinished(self):
 		url=self.ui.urlField.text()
 		online="sartopo.com" in url.lower()
-		self.ui.label_4.setEnabled(online)
+		self.ui.accountNameLabel.setEnabled(online)
 		self.ui.accountNameField.setEnabled(online)
 		if online: # in an online map, make sure account is specified, then try to create session
 			if self.ui.accountNameField.text()!="":
@@ -704,12 +749,29 @@ class optionsDialog(QDialog,Ui_optionsDialog):
 				self.ui.accountNameField.setFocus()
 		else: # if a local map, try to create the session immediately
 			self.parent.createSTS()
-		
-	def accountNameEditingFinished(self):
+	
+	def folderComboBoxIndexChanged(self):
+		self.parent.ui.existingMarkerComboBox.setCurrentIndex(0)
+
+	# note: calling createSTS on editingFinished, which includes focusOut,
+	#  causes failed link when tabbing out of the url field if the accountName
+	#  field is next in tab sequence.  So, use textChanged instead.
+	def accountNameTextChanged(self):
 		an=self.ui.accountNameField.text()
 		self.parent.accountName=an
 		self.parent.createSTS()
-		
+
+	def markerFileEditingFinished(self):
+		mf=self.ui.markerFileField.text()
+		if not os.path.isfile(mf):
+			warn=QMessageBox(QMessageBox.Warning,"Error","Specified marker definition file "+mf+" does not exist.",
+					QMessageBox.Ok,self,Qt.WindowTitleHint|Qt.WindowCloseButtonHint|Qt.Dialog|Qt.MSWindowsFixedSizeDialogHint|Qt.WindowStaysOnTopHint)
+			warn.show()
+			warn.raise_()
+			warn.exec_()
+			return
+		self.parent.markerFileName=mf
+
 	def locationFileEditingFinished(self):
 		lf=self.ui.locationFileField.text()
 		if not os.path.isfile(lf):
